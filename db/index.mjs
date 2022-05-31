@@ -6,7 +6,6 @@ export default {
   }
 }
 
-
 /**
  * Find a record by key in a database
  * @param {*} db 
