@@ -1,0 +1,8 @@
+extends layout 
+
+block content
+  script(type="text/javascript").
+    const token = "!{token}";
+    console.log(token);
+    console.log("on fait un postMessage de l'iframe vers la page parente")
+    window.top.postMessage(`sso_session=${token}`, "*")

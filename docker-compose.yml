@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+  # Service central et unique d'authentification  
+  sso-server:
+    # image: node:18
+    build: server
+    # ports:
+    #   - "5000:3000"
+    environment:
+      VIRTUAL_HOST: sso-server.test
+      VIRTUAL_PORT: 3000
+      SELF_SIGNED_HOST: sso-server.test
+    volumes:
+      - ./server/:/home/node/app
+
+  # Quelques services (sites web) "clients" du SSO
+  sso-client1:
+    build: client1
+    environment:
+      VIRTUAL_HOST: sso-client1.test
+      VIRTUAL_PORT: 3000
+      SELF_SIGNED_HOST: sso-client1.test
+    volumes:
+      - ./client1/:/home/node/app
+
+  adminer:
+    image: adminer:4.8.1
+    environment:
+      VIRTUAL_HOST: adminer.test
+
+  whoami:
+    image: jwilder/whoami
+    environment:
+      VIRTUAL_HOST: whoami.test
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./certs:/etc/nginx/certs:ro
+
+  # Self-signed certificates manager for nginx-proxy
+  ss-proxy-companion:
+    image: sebastienheyd/self-signed-proxy-companion
+    container_name: ss-proxy-companion
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs:rw
